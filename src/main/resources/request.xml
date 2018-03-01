@@ -1,0 +1,5 @@
+<request>
+    <request-type>CREATE-AGT</request-type>
+    <extra name="login">123456id</extra>
+    <extra name="password">pwd</extra>
+</request>

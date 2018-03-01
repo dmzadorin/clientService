@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="request" type="requestType"/>
+    <xs:complexType name="requestType">
+        <xs:sequence>
+            <xs:element name="request-type" type="request-enum-type"/>
+            <xs:element type="extraType" name="extra" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="request-enum-type">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CREATE-AGT"/>
+            <xs:enumeration value="GET-BALANCE"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="extraType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute type="xs:string" name="name" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+</xs:schema>
