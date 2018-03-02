@@ -17,10 +17,10 @@ public class ClientController {
 
     @PostMethod(name = "CREATE-AGT")
     public void registerClient(@RequestParam(name = "login") String login, @RequestParam(name = "password") String password) {
-        service.registerClient(login, password.toCharArray());
+        service.registerClient(login, password);
     }
 
     @PostMethod(name = "GET-BALANCE", returnParamName = "balance")
     public double getBalance(String login, String password) {
-        return service.getBalance(login, password.toCharArray());
+        return service.getClientBalance(login, password);
     }}
