@@ -9,7 +9,7 @@ public class IncorrectPasswordException extends ApplicationException {
     }
 
     @Override
-    int getResultCode() {
+    public int getResultCode() {
         return 4;
     }
 }

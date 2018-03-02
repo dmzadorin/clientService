@@ -10,7 +10,7 @@ public class ClientAlreadyExistException extends ApplicationException {
     }
 
     @Override
-    int getResultCode() {
+    public int getResultCode() {
         return 1;
     }
 }

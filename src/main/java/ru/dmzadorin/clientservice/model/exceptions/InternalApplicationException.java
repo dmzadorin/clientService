@@ -9,7 +9,7 @@ public class InternalApplicationException extends ApplicationException {
     }
 
     @Override
-    int getResultCode() {
+    public int getResultCode() {
         return 2;
     }
 }

@@ -1,7 +1,13 @@
 package ru.dmzadorin.clientservice.config;
 
+import ru.dmzadorin.clientservice.controller.ClientController;
 import ru.dmzadorin.clientservice.dao.ClientDao;
 import ru.dmzadorin.clientservice.dao.ClientDaoImpl;
+import ru.dmzadorin.clientservice.net.ExceptionMapper;
+import ru.dmzadorin.clientservice.net.RequestDispatcher;
+import ru.dmzadorin.clientservice.net.ResponseHandler;
+import ru.dmzadorin.clientservice.net.serializer.RequestDeserializer;
+import ru.dmzadorin.clientservice.net.serializer.ResponseSerializer;
 import ru.dmzadorin.clientservice.service.ClientService;
 import ru.dmzadorin.clientservice.service.ClientServiceImpl;
 import ru.dmzadorin.clientservice.service.Sha1PasswordHashService;
@@ -19,12 +25,16 @@ public class ApplicationConfig {
     private final DataSource dataSource;
     private final ClientService clientService;
     private final ClientDao clientDao;
+    private final RequestDispatcher requestDispatcher;
+    private final ResponseHandler responseHandler;
 
-    public ApplicationConfig() {
+    public ApplicationConfig() throws Exception{
         properties = readProperties();
         dataSource = configureDataSource(properties);
         clientDao = new ClientDaoImpl(dataSource);
         clientService = new ClientServiceImpl(clientDao, new Sha1PasswordHashService());
+        requestDispatcher = new RequestDispatcher(new RequestDeserializer(), new ClientController(clientService));
+        responseHandler = new ResponseHandler(new ResponseSerializer(), new ExceptionMapper());
     }
 
     public DataSource getDataSource() {
@@ -37,6 +47,14 @@ public class ApplicationConfig {
 
     public ClientDao getClientDao() {
         return clientDao;
+    }
+
+    public RequestDispatcher getRequestDispatcher() {
+        return requestDispatcher;
+    }
+
+    public ResponseHandler getResponseHandler() {
+        return responseHandler;
     }
 
     private static Properties readProperties() {

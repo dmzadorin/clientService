@@ -12,5 +12,5 @@ public abstract class ApplicationException extends RuntimeException {
         super(message, cause, true, false);
     }
 
-    abstract int getResultCode();
+    public abstract int getResultCode();
 }

@@ -1,12 +1,8 @@
 package ru.dmzadorin.clientservice;
 
 import com.sun.net.httpserver.HttpServer;
-import ru.dmzadorin.clientservice.net.RequestDispatcher;
-import ru.dmzadorin.clientservice.net.ResponseHandler;
-import ru.dmzadorin.clientservice.net.ExceptionMapper;
+import ru.dmzadorin.clientservice.config.ApplicationConfig;
 import ru.dmzadorin.clientservice.net.ClientServiceHttpHandler;
-import ru.dmzadorin.clientservice.net.serializer.RequestDeserializer;
-import ru.dmzadorin.clientservice.net.serializer.ResponseSerializer;
 
 import java.net.InetSocketAddress;
 
@@ -18,9 +14,8 @@ public class App {
         HttpServer httpServer = HttpServer.create();
         try {
             httpServer.bind(new InetSocketAddress(9999), 0);
-            RequestDispatcher dispatcher = new RequestDispatcher(new RequestDeserializer());
-            ResponseHandler handler = new ResponseHandler(new ResponseSerializer(), new ExceptionMapper());
-            httpServer.createContext("/", new ClientServiceHttpHandler(dispatcher, handler));
+            ApplicationConfig config = new ApplicationConfig();
+            httpServer.createContext("/", new ClientServiceHttpHandler(config));
             System.out.println("Running http server on port 9999");
             httpServer.start();
             System.out.println("Press any key to stop server");

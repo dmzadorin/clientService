@@ -9,7 +9,7 @@ public class ClientNotExistException extends ApplicationException {
     }
 
     @Override
-    int getResultCode() {
+    public int getResultCode() {
         return 3;
     }
 }

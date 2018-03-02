@@ -1,6 +1,8 @@
 package ru.dmzadorin.clientservice.net;
 
 import com.sun.net.httpserver.HttpExchange;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.dmzadorin.clientservice.model.response.ResponseType;
 
 import java.io.IOException;
@@ -10,8 +12,9 @@ import java.util.function.Function;
  * Created by Dmitry Zadorin on 02.03.2018
  */
 public class ResponseHandler {
-    public static final int SUCCESS_CODE = 200;
-    public static final int METHOD_NOT_SUPPORTED_CODE = 405;
+    private static final Logger logger = LogManager.getLogger();
+    private static final int SUCCESS_CODE = 200;
+    private static final int METHOD_NOT_SUPPORTED_CODE = 405;
     private final Function<ResponseType, String> responseSerializer;
     private final Function<Exception, ResponseType> exceptionHandler;
 
@@ -43,7 +46,7 @@ public class ResponseHandler {
             httpExchange.sendResponseHeaders(httpCode, bytes.length);
             httpExchange.getResponseBody().write(bytes);
         } catch (IOException e) {
-            System.out.println("Cannot write response");
+            logger.error("Cannot write response");
         }
     }
 }

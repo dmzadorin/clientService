@@ -2,6 +2,7 @@ package ru.dmzadorin.clientservice.net;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import ru.dmzadorin.clientservice.config.ApplicationConfig;
 import ru.dmzadorin.clientservice.model.response.ResponseType;
 
 import java.io.IOException;
@@ -12,15 +13,14 @@ import java.io.OutputStream;
  * Created by Dmitry Zadorin on 01.03.2018
  */
 public class ClientServiceHttpHandler implements HttpHandler {
-    public static final String POST_METHOD = "POST";
+    private static final String POST_METHOD = "POST";
     private final RequestDispatcher dispatcher;
     private final ResponseHandler responseHandler;
 
-    public ClientServiceHttpHandler(RequestDispatcher dispatcher, ResponseHandler responseHandler) {
-        this.dispatcher = dispatcher;
-        this.responseHandler = responseHandler;
+    public ClientServiceHttpHandler(ApplicationConfig config) {
+        this.dispatcher = config.getRequestDispatcher();
+        this.responseHandler = config.getResponseHandler();
     }
-
 
     @Override
     public void handle(HttpExchange httpExchange) {

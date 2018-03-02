@@ -1,6 +1,6 @@
 package ru.dmzadorin.clientservice.net;
 
-import ru.dmzadorin.clientservice.model.exception.ApplicationException;
+import ru.dmzadorin.clientservice.model.exceptions.ApplicationException;
 import ru.dmzadorin.clientservice.model.response.ResponseType;
 
 import java.util.function.Function;
