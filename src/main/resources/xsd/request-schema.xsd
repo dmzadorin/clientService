@@ -4,16 +4,10 @@
     <xs:element name="request" type="requestType"/>
     <xs:complexType name="requestType">
         <xs:sequence>
-            <xs:element name="request-type" type="request-enum-type"/>
+            <xs:element name="request-type" type="xs:string"/>
             <xs:element type="extraType" name="extra" maxOccurs="unbounded" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
-    <xs:simpleType name="request-enum-type">
-        <xs:restriction base="xs:string">
-            <xs:enumeration value="CREATE-AGT"/>
-            <xs:enumeration value="GET-BALANCE"/>
-        </xs:restriction>
-    </xs:simpleType>
     <xs:complexType name="extraType">
         <xs:simpleContent>
             <xs:extension base="xs:string">

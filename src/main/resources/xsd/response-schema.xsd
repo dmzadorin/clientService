@@ -9,7 +9,7 @@
   </xs:complexType>
   <xs:complexType name="extraType">
     <xs:simpleContent>
-      <xs:extension base="xs:double">
+      <xs:extension base="xs:string">
         <xs:attribute type="xs:string" name="name"/>
       </xs:extension>
     </xs:simpleContent>

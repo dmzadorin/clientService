@@ -7,9 +7,7 @@ import ru.dmzadorin.clientservice.model.response.ResponseType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Created by Dmitry Zadorin on 02.03.2018
