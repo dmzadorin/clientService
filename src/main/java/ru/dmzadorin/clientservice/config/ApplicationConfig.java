@@ -6,6 +6,7 @@ import ru.dmzadorin.clientservice.dao.ClientDaoImpl;
 import ru.dmzadorin.clientservice.net.ExceptionMapper;
 import ru.dmzadorin.clientservice.net.RequestDispatcher;
 import ru.dmzadorin.clientservice.net.ResponseHandler;
+import ru.dmzadorin.clientservice.net.TypeConverter;
 import ru.dmzadorin.clientservice.net.serializer.RequestDeserializer;
 import ru.dmzadorin.clientservice.net.serializer.ResponseSerializer;
 import ru.dmzadorin.clientservice.service.ClientService;
@@ -15,6 +16,9 @@ import ru.dmzadorin.clientservice.service.Sha1PasswordHashService;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -33,7 +37,13 @@ public class ApplicationConfig {
         dataSource = configureDataSource(properties);
         clientDao = new ClientDaoImpl(dataSource);
         clientService = new ClientServiceImpl(clientDao, new Sha1PasswordHashService());
-        requestDispatcher = new RequestDispatcher(new RequestDeserializer(), new ClientController(clientService));
+        Map<Type, TypeConverter> typeConverterMap = new HashMap<>();
+        typeConverterMap.put(String.class, s -> s);
+        typeConverterMap.put(Integer.class, Integer::parseInt);
+        typeConverterMap.put(Double.class, Double::parseDouble);
+        typeConverterMap.put(Boolean.class, Boolean::parseBoolean);
+
+        requestDispatcher = new RequestDispatcher(new RequestDeserializer(), typeConverterMap, new ClientController(clientService));
         responseHandler = new ResponseHandler(new ResponseSerializer(), new ExceptionMapper());
     }
 

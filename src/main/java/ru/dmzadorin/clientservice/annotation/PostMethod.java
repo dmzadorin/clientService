@@ -13,5 +13,5 @@ import java.lang.annotation.Target;
 public @interface PostMethod {
     String name();
 
-    String returnParamName() default "";
+    String returnParamName() default "returnParam";
 }

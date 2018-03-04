@@ -11,6 +11,7 @@ package ru.dmzadorin.clientservice.model.response;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -39,6 +40,7 @@ import javax.xml.bind.annotation.XmlType;
     "resultCode",
     "extra"
 })
+@XmlRootElement(name = "response")
 public class ResponseType {
 
     @XmlElement(name = "result-code")

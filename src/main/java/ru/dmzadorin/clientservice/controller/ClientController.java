@@ -21,6 +21,6 @@ public class ClientController {
     }
 
     @PostMethod(name = "GET-BALANCE", returnParamName = "balance")
-    public double getBalance(String login, String password) {
+    public double getBalance(@RequestParam(name = "login") String login, @RequestParam(name = "password") String password) {
         return service.getClientBalance(login, password);
     }}
