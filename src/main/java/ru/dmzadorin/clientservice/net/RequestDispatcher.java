@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.dmzadorin.clientservice.annotation.PostMethod;
 import ru.dmzadorin.clientservice.annotation.RequestParam;
+import ru.dmzadorin.clientservice.model.exceptions.ApplicationException;
 import ru.dmzadorin.clientservice.model.request.ExtraType;
 import ru.dmzadorin.clientservice.model.request.RequestType;
 import ru.dmzadorin.clientservice.model.response.ResponseType;
@@ -32,8 +33,8 @@ public class RequestDispatcher {
 
     public RequestDispatcher(Function<InputStream, RequestType> requestDeserializer, Map<Type, TypeConverter> typeConverters, Object... controllers) {
         this.requestDeserializer = requestDeserializer;
-        methodRouting = new HashMap<>();
         this.typeConverters = typeConverters;
+        methodRouting = new HashMap<>();
         scanControllers(controllers);
     }
 
@@ -43,29 +44,34 @@ public class RequestDispatcher {
             for (Method method : clazz.getDeclaredMethods()) {
                 PostMethod postMethod = method.getDeclaredAnnotation(PostMethod.class);
                 if (postMethod != null) {
-                    String methodName = postMethod.name();
-                    String returnParamName = postMethod.returnParamName();
-                    List<ParameterMetadata> parameterMetadata = new ArrayList<>(method.getParameterCount());
-                    for (Parameter parameter : method.getParameters()) {
-                        RequestParam requestParam = parameter.getDeclaredAnnotation(RequestParam.class);
-                        String paramName;
-                        if (requestParam != null) {
-                            paramName = requestParam.name();
-                        } else {
-                            //No handy annotation for this param. Will try to match param by name as it is declared in code
-                            throw new IllegalArgumentException("No annotation @RequestParam present for parameter " + parameter.getName() + " in method " + methodName);
-                        }
-                        Type type = parameter.getParameterizedType();
-                        TypeConverter typeConverter = typeConverters.get(type);
-                        if (typeConverter == null) {
-                            throw new IllegalArgumentException("Type converter for type " + type.getTypeName() + " is not present!");
-                        }
-                        parameterMetadata.add(new ParameterMetadata(paramName, parameter.getType(), typeConverter));
-                    }
-                    methodRouting.put(methodName, new MethodMetadata(controller, method, parameterMetadata, returnParamName));
+                    scanPostMethod(controller, method, postMethod);
                 }
             }
         }
+    }
+
+    private void scanPostMethod(Object controller, Method method, PostMethod postMethod) {
+        String methodName = postMethod.name();
+        String returnParamName = postMethod.returnParamName();
+        List<ParameterMetadata> parameterMetadata = new ArrayList<>(method.getParameterCount());
+        for (Parameter parameter : method.getParameters()) {
+            RequestParam requestParam = parameter.getDeclaredAnnotation(RequestParam.class);
+            String paramName;
+            if (requestParam != null) {
+                paramName = requestParam.name();
+            } else {
+                //No RequestParam annotation for this param, it won't be possible to bind it for request
+                throw new IllegalArgumentException("No annotation @RequestParam present for parameter " +
+                        parameter.getName() + " in method " + methodName);
+            }
+            Type type = parameter.getParameterizedType();
+            TypeConverter typeConverter = typeConverters.get(type);
+            if (typeConverter == null) {
+                throw new IllegalArgumentException("Type converter for type " + type.getTypeName() + " is not present!");
+            }
+            parameterMetadata.add(new ParameterMetadata(paramName, typeConverter));
+        }
+        methodRouting.put(methodName, new MethodMetadata(controller, method, parameterMetadata, returnParamName));
     }
 
     public ResponseType handleRequest(InputStream requestBody) {
@@ -96,13 +102,13 @@ public class RequestDispatcher {
 
     private class MethodMetadata {
         private final Object controller;
-        private final Method methodToInvoke;
+        private final Method method;
         private final List<ParameterMetadata> parameters;
         private final String returnParamName;
 
-        public MethodMetadata(Object controller, Method methodToInvoke, List<ParameterMetadata> parameters, String returnParamName) {
+        public MethodMetadata(Object controller, Method method, List<ParameterMetadata> parameters, String returnParamName) {
             this.controller = controller;
-            this.methodToInvoke = methodToInvoke;
+            this.method = method;
             this.parameters = parameters;
             this.returnParamName = returnParamName;
         }
@@ -123,13 +129,25 @@ public class RequestDispatcher {
             responseType.setResultCode(0);
             try {
                 Object[] arrArgs = args.toArray();
-                Object result = methodToInvoke.invoke(controller, arrArgs);
+                Object result = method.invoke(controller, arrArgs);
                 if (result instanceof Number || result instanceof String) {
                     responseType.setExtra(buildResponse(result.toString()));
                 }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                logger.error("Failed to invoke method: " + methodToInvoke.getName(), e);
+            } catch (IllegalAccessException e) {
+                logger.error("Failed to invoke method: " + method.getName() + " since it's not accessible", e);
                 throw new IllegalStateException(e);
+            } catch (InvocationTargetException e) {
+                Throwable targetException = e.getTargetException();
+                //If target exception is instance of ApplicationException then rethrow it. Else throw
+                // IllegalStateException since we don't actually know what caused that exception. It could be either NPE,
+                // or other runtime exception
+                if (targetException instanceof ApplicationException) {
+                    throw (ApplicationException) targetException;
+                } else {
+                    logger.error("Got non-application exception while invoking method: " + method.getName(),
+                            targetException);
+                    throw new IllegalStateException(targetException);
+                }
             }
             return responseType;
         }
@@ -145,12 +163,10 @@ public class RequestDispatcher {
 
     private class ParameterMetadata {
         private final String name;
-        private final Class<?> clazz;
         private final TypeConverter<?> typeConverter;
 
-        private ParameterMetadata(String name, Class<?> clazz, TypeConverter<?> typeConverter) {
+        private ParameterMetadata(String name, TypeConverter<?> typeConverter) {
             this.name = name;
-            this.clazz = clazz;
             this.typeConverter = typeConverter;
         }
     }

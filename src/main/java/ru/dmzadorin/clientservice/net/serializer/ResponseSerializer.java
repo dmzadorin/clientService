@@ -23,7 +23,7 @@ public class ResponseSerializer implements Function<ResponseType, String> {
     public String apply(ResponseType responseType) {
         try {
             StringWriter writer = new StringWriter();
-            Marshaller marshaller = getUnmarshaller();
+            Marshaller marshaller = getMarshaller();
             marshaller.marshal(responseType, writer);
             return writer.toString();
         } catch (JAXBException e) {
@@ -31,7 +31,7 @@ public class ResponseSerializer implements Function<ResponseType, String> {
         }
     }
 
-    private Marshaller getUnmarshaller() throws JAXBException {
+    private Marshaller getMarshaller() throws JAXBException {
         Marshaller marshaller = marshallerThreadLocal.get();
         if (marshaller == null) {
             marshaller = jaxbContext.createMarshaller();

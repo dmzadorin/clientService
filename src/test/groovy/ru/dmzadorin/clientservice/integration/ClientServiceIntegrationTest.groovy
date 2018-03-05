@@ -1,7 +1,5 @@
 package ru.dmzadorin.clientservice.integration
 
-import com.sun.net.httpserver.HttpExchange
-import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
 import ru.dmzadorin.clientservice.config.ApplicationConfig
 import ru.dmzadorin.clientservice.model.request.ExtraType
@@ -12,7 +10,6 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 import javax.xml.bind.JAXBContext
-import javax.xml.bind.Marshaller
 
 class ClientServiceIntegrationTest extends Specification {
     @Shared
@@ -30,7 +27,7 @@ class ClientServiceIntegrationTest extends Specification {
         url = new URL("http://localhost:8080/")
     }
 
-    def "Simple request response test"() {
+    def "Register client and request balance"() {
         given:
         def createClient = new RequestType()
         createClient.requestType = 'CREATE-AGT'
@@ -45,23 +42,57 @@ class ClientServiceIntegrationTest extends Specification {
         def clientCreateResponse = sendRequest(createClient)
         def balanceResponse = sendRequest(getBalance)
         then:
-        clientCreateResponse != null
-        balanceResponse != null
         noExceptionThrown()
+        clientCreateResponse.resultCode == 0
+        balanceResponse.resultCode == 0
+        balanceResponse.extra.name == 'balance'
+        balanceResponse.extra.value == '0.0'
     }
 
-    def buildRequest(RequestType request) {
+    def "Try to register client with existing login"() {
+        given:
+        def createClient = new RequestType()
+        createClient.requestType = 'CREATE-AGT'
+        createClient.getExtra().add(new ExtraType(name: 'login', value: 'testlogin'))
+        createClient.getExtra().add(new ExtraType(name: 'password', value: 'pass'))
+        when:
+        def clientCreateResponse = sendRequest(createClient)
+        then:
+        noExceptionThrown()
+        clientCreateResponse.resultCode == 1
+    }
 
-        StringWriter
-        marshaller.marshal(request,)
+    def "Get balance for non existing client"() {
+        given:
+        def getBalance = new RequestType()
+        getBalance.requestType = 'GET-BALANCE'
+        getBalance.getExtra().add(new ExtraType(name: 'login', value: 'testlogin2'))
+        getBalance.getExtra().add(new ExtraType(name: 'password', value: 'pass'))
+        when:
+        def clientCreateResponse = sendRequest(getBalance)
+        then:
+        noExceptionThrown()
+        clientCreateResponse.resultCode == 3
+    }
+
+    def "Get balance for client with incorrect password"() {
+        given:
+        def getBalance = new RequestType()
+        getBalance.requestType = 'GET-BALANCE'
+        getBalance.getExtra().add(new ExtraType(name: 'login', value: 'testlogin'))
+        getBalance.getExtra().add(new ExtraType(name: 'password', value: 'pass2'))
+        when:
+        def clientCreateResponse = sendRequest(getBalance)
+        then:
+        noExceptionThrown()
+        clientCreateResponse.resultCode == 4
     }
 
     void cleanupSpec() {
         httpServer.stop(1)
     }
 
-    String sendRequest(RequestType request) {
-        def sb = new StringBuilder()
+    ResponseType sendRequest(RequestType request) {
         HttpURLConnection connection = null
         try {
             connection = initConnection()
@@ -75,19 +106,17 @@ class ClientServiceIntegrationTest extends Specification {
             connection.connect()
             int statusCode = connection.getResponseCode();
             println("Status: $statusCode")
-            BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()))
-
-            def inputString = ''
-            while ((inputString = input.readLine()) != null) {
-                sb.append(inputString)
-            }
-            input.close();
+            jaxbContext = JAXBContext.newInstance(ResponseType.class);
+            def unMarshaller = jaxbContext.createUnmarshaller()
+            def inputStream = connection.getInputStream()
+            def resp = unMarshaller.unmarshal(inputStream)
+            inputStream.close();
+            resp
         } catch (Exception e) {
             throw new IllegalStateException(e)
         } finally {
             connection?.disconnect()
         }
-        sb.toString()
     }
 
     def HttpURLConnection initConnection() throws IOException {
