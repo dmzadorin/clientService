@@ -1,3 +1,4 @@
+#Client service brief description
 Client service is intended to demonstrate simple http server with request processing via xml request-response model
 Data is stored in in-memory database (Standalone H2 instance)
 
@@ -14,5 +15,7 @@ java -jar clientservice-1.0-SNAPSHOT.jar
 
 If you want to override configuration properies simply pass jvm argument -Dconfig.location
 java -jar clientservice-1.0-SNAPSHOT.jar -Dconfig.location=%PATH_TO_CONFIG%
+
+client-service.jmx - sample Jmeter testing suite
 
 
