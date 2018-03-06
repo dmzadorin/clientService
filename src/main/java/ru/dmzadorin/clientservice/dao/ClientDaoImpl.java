@@ -25,7 +25,7 @@ public class ClientDaoImpl implements ClientDao {
     }
 
     @Override
-    public void registerClient(String login, String passwordHash) {
+    public void registerClient(String login, String passwordHash) throws ClientAlreadyExistException {
         DaoUtils.executeQueryWithTransaction(dataSource, connection -> {
             try (PreparedStatement selectStmt = connection.prepareStatement(CHECK_IF_CLIENT_EXIST)) {
                 selectStmt.setString(1, login);
@@ -46,7 +46,7 @@ public class ClientDaoImpl implements ClientDao {
     }
 
     @Override
-    public Client getClient(String login) {
+    public Client getClient(String login) throws ClientNotExistException {
         return DaoUtils.executeQuery(dataSource, GET_CLIENT, statement -> {
             statement.setString(1, login);
             try (ResultSet rs = statement.executeQuery()) {

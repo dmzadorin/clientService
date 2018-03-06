@@ -1,4 +1,4 @@
-package ru.dmzadorin.clientservice.net;
+package ru.dmzadorin.clientservice.net.response;
 
 import ru.dmzadorin.clientservice.model.exceptions.ApplicationException;
 import ru.dmzadorin.clientservice.model.response.ResponseType;

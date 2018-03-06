@@ -5,10 +5,12 @@ import org.apache.logging.log4j.Logger;
 import ru.dmzadorin.clientservice.controller.ClientController;
 import ru.dmzadorin.clientservice.dao.ClientDao;
 import ru.dmzadorin.clientservice.dao.ClientDaoImpl;
-import ru.dmzadorin.clientservice.net.ExceptionMapper;
-import ru.dmzadorin.clientservice.net.RequestDispatcher;
-import ru.dmzadorin.clientservice.net.ResponseHandler;
-import ru.dmzadorin.clientservice.net.TypeConverter;
+import ru.dmzadorin.clientservice.net.request.RequestDispatcher;
+import ru.dmzadorin.clientservice.net.response.ExceptionMapper;
+import ru.dmzadorin.clientservice.net.request.RequestDispatcherImpl;
+import ru.dmzadorin.clientservice.net.response.ResponseHandler;
+import ru.dmzadorin.clientservice.net.response.ResponseHandlerImpl;
+import ru.dmzadorin.clientservice.net.request.TypeConverter;
 import ru.dmzadorin.clientservice.net.serializer.RequestDeserializer;
 import ru.dmzadorin.clientservice.net.serializer.ResponseSerializer;
 import ru.dmzadorin.clientservice.service.ClientService;
@@ -49,8 +51,9 @@ public class ApplicationConfig {
         typeConverterMap.put(Double.class, Double::parseDouble);
         typeConverterMap.put(Boolean.class, Boolean::parseBoolean);
 
-        requestDispatcher = new RequestDispatcher(new RequestDeserializer(), typeConverterMap, new ClientController(clientService));
-        responseHandler = new ResponseHandler(new ResponseSerializer(), new ExceptionMapper());
+        requestDispatcher = new RequestDispatcherImpl(new RequestDeserializer(), typeConverterMap,
+                new ClientController(clientService));
+        responseHandler = new ResponseHandlerImpl(new ResponseSerializer(), new ExceptionMapper());
     }
 
     public DataSource getDataSource() {

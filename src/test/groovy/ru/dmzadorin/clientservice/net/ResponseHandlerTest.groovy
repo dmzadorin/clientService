@@ -3,6 +3,7 @@ package ru.dmzadorin.clientservice.net
 import com.sun.net.httpserver.HttpExchange
 import org.junit.Assert
 import ru.dmzadorin.clientservice.model.response.ResponseType
+import ru.dmzadorin.clientservice.net.response.ResponseHandlerImpl
 import spock.lang.Specification
 
 import java.util.function.Function
@@ -15,7 +16,7 @@ class ResponseHandlerTest extends Specification {
         given:
         def serializer = Mock(Function)
         def exceptionMapper = Mock(Function)
-        def responseHandler = new ResponseHandler(serializer, exceptionMapper)
+        def responseHandler = new ResponseHandlerImpl(serializer, exceptionMapper)
         def ex = new Exception()
         def errResponse = new ResponseType(resultCode: 2)
         def httpExchange = Mock(HttpExchange)
@@ -35,7 +36,7 @@ class ResponseHandlerTest extends Specification {
         given:
         def serializer = Mock(Function)
         def exceptionMapper = Mock(Function)
-        def responseHandler = new ResponseHandler(serializer, exceptionMapper)
+        def responseHandler = new ResponseHandlerImpl(serializer, exceptionMapper)
         def success = new ResponseType(resultCode: 0)
         def httpExchange = Mock(HttpExchange)
         def response = "success"
@@ -53,7 +54,7 @@ class ResponseHandlerTest extends Specification {
         given:
         def serializer = Mock(Function)
         def exceptionMapper = Mock(Function)
-        def responseHandler = new ResponseHandler(serializer, exceptionMapper)
+        def responseHandler = new ResponseHandlerImpl(serializer, exceptionMapper)
         def httpExchange = Mock(HttpExchange)
         def response = "success"
         def stream = Mock(OutputStream)

@@ -1,4 +1,4 @@
-package ru.dmzadorin.clientservice.net;
+package ru.dmzadorin.clientservice.net.request;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,17 +23,27 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
+ * This class manages request handling and dispatching them to concrete controller
+ * When new request dispatcher is created it scans all supplied controllers for PostMethod annotation.
+ * All methods with that annotation would be collected and then used to dispatch requests
  * Created by Dmitry Zadorin on 02.03.2018
  */
-public class RequestDispatcher {
+public class RequestDispatcherImpl implements RequestDispatcher {
     private static final Logger logger = LogManager.getLogger();
     private final Function<InputStream, RequestType> requestDeserializer;
     private final Map<String, MethodMetadata> methodRouting;
     private final Map<Type, TypeConverter> typeConverters;
 
-    public RequestDispatcher(Function<InputStream, RequestType> requestDeserializer,
-                             Map<Type, TypeConverter> typeConverters,
-                             Object... controllers) {
+    /**
+     * Creates new request dispatcher
+     *
+     * @param requestDeserializer function that would be used to transform input strema into RequestType object
+     * @param typeConverters      converts map that would be used to convert string values of request param to concrete types
+     * @param controllers         an array of controllers which method should be scanned
+     */
+    public RequestDispatcherImpl(Function<InputStream, RequestType> requestDeserializer,
+                                 Map<Type, TypeConverter> typeConverters,
+                                 Object... controllers) {
         this.requestDeserializer = requestDeserializer;
         this.typeConverters = typeConverters;
         methodRouting = new HashMap<>();
@@ -76,6 +86,7 @@ public class RequestDispatcher {
         methodRouting.put(methodName, new MethodMetadata(controller, method, parameterMetadata, returnParamName));
     }
 
+    @Override
     public ResponseType handleRequest(InputStream requestBody) {
         try {
             RequestType requestType = requestDeserializer.apply(requestBody);
