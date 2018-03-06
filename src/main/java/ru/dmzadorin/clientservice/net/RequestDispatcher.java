@@ -31,7 +31,9 @@ public class RequestDispatcher {
     private final Map<String, MethodMetadata> methodRouting;
     private final Map<Type, TypeConverter> typeConverters;
 
-    public RequestDispatcher(Function<InputStream, RequestType> requestDeserializer, Map<Type, TypeConverter> typeConverters, Object... controllers) {
+    public RequestDispatcher(Function<InputStream, RequestType> requestDeserializer,
+                             Map<Type, TypeConverter> typeConverters,
+                             Object... controllers) {
         this.requestDeserializer = requestDeserializer;
         this.typeConverters = typeConverters;
         methodRouting = new HashMap<>();
@@ -131,7 +133,7 @@ public class RequestDispatcher {
                 Object[] arrArgs = args.toArray();
                 Object result = method.invoke(controller, arrArgs);
                 if (result instanceof Number || result instanceof String) {
-                    responseType.setExtra(buildResponse(result.toString()));
+                    responseType.setExtra(buildExtra(result.toString()));
                 }
             } catch (IllegalAccessException e) {
                 logger.error("Failed to invoke method: " + method.getName() + " since it's not accessible", e);
@@ -152,7 +154,7 @@ public class RequestDispatcher {
             return responseType;
         }
 
-        private ru.dmzadorin.clientservice.model.response.ExtraType buildResponse(String value) {
+        private ru.dmzadorin.clientservice.model.response.ExtraType buildExtra(String value) {
             ru.dmzadorin.clientservice.model.response.ExtraType extraType =
                     new ru.dmzadorin.clientservice.model.response.ExtraType();
             extraType.setName(returnParamName);

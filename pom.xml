@@ -16,6 +16,7 @@
     <log4j2.version>2.10.0</log4j2.version>
     <h2.version>1.4.196</h2.version>
     <spock.version>1.1-groovy-2.4</spock.version>
+    <byte-buddy.version>1.7.11</byte-buddy.version>
   </properties>
 
   <build>
@@ -35,6 +36,34 @@
           <artifactId>maven-dependency-plugin</artifactId>
           <version>2.4</version>
         </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-jar-plugin</artifactId>
+              <configuration>
+                  <archive>
+                      <index>true</index>
+                      <manifest>
+                          <addClasspath>true</addClasspath>
+                          <addExtensions>false</addExtensions>
+                          <classpathPrefix>lib/</classpathPrefix>
+                          <mainClass>ru.dmzadorin.clientservice.App</mainClass>
+                      </manifest>
+                  </archive>
+              </configuration>
+          </plugin>
+          <plugin>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <configuration>
+                  <archive>
+                      <manifest>
+                          <mainClass>ru.dmzadorin.clientservice.App</mainClass>
+                      </manifest>
+                  </archive>
+                  <descriptors>
+                      <descriptor>assembly.xml</descriptor>
+                  </descriptors>
+              </configuration>
+          </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -60,6 +89,12 @@
       <groupId>org.spockframework</groupId>
       <artifactId>spock-core</artifactId>
       <version>${spock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+      <version>${byte-buddy.version}</version>
       <scope>test</scope>
     </dependency>
 

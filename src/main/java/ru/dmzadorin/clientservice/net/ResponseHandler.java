@@ -16,16 +16,16 @@ public class ResponseHandler {
     private static final int SUCCESS_CODE = 200;
     private static final int METHOD_NOT_SUPPORTED_CODE = 405;
     private final Function<ResponseType, String> responseSerializer;
-    private final Function<Exception, ResponseType> exceptionHandler;
+    private final Function<Exception, ResponseType> exceptionMapper;
 
     public ResponseHandler(Function<ResponseType, String> responseSerializer,
-                           Function<Exception, ResponseType> exceptionHandler) {
+                           Function<Exception, ResponseType> exceptionMapper) {
         this.responseSerializer = responseSerializer;
-        this.exceptionHandler = exceptionHandler;
+        this.exceptionMapper = exceptionMapper;
     }
 
     public void handleException(Exception e, HttpExchange httpExchange) {
-        ResponseType exceptionResponse = exceptionHandler.apply(e);
+        ResponseType exceptionResponse = exceptionMapper.apply(e);
         writeSuccessResponse(exceptionResponse, httpExchange);
     }
 
@@ -35,7 +35,7 @@ public class ResponseHandler {
 
     public void writeMethodNotSupported(HttpExchange httpExchange) {
         ResponseType responseType = new ResponseType();
-        responseType.setResultCode(4);
+        responseType.setResultCode(2);
         writeResponse(responseType, METHOD_NOT_SUPPORTED_CODE, httpExchange);
     }
 
